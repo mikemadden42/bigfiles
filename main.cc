@@ -1,13 +1,14 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <vector>
 
 namespace fs = std::filesystem;
 
-std::vector<fs::path> find_large_files(const fs::path& directory,
-                                       uintmax_t size_limit,
-                                       std::ofstream& log_file) {
+std::optional<std::vector<fs::path>> find_large_files(const fs::path& directory,
+                                                      uintmax_t size_limit,
+                                                      std::ofstream& log_file) {
     std::vector<fs::path> large_files;
     try {
         for (const auto& entry : fs::recursive_directory_iterator(
@@ -24,8 +25,13 @@ std::vector<fs::path> find_large_files(const fs::path& directory,
         }
     } catch (const fs::filesystem_error& e) {
         log_file << "Error: " << e.what() << std::endl;
+        return std::nullopt;
     }
     return large_files;
+}
+
+void log_error(std::ofstream& log_file, const std::string& message) {
+    log_file << "Error: " << message << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -46,14 +52,17 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::vector<fs::path> large_files =
-        find_large_files(directory, size_limit, log_file);
+    auto large_files_opt = find_large_files(directory, size_limit, log_file);
+    if (!large_files_opt) {
+        log_error(log_file, "Failed to find large files");
+        return 1;
+    }
 
+    const auto& large_files = *large_files_opt;
     std::cout << "Files larger than 4 GB:" << std::endl;
     for (const auto& file : large_files) {
         std::cout << file << std::endl;
     }
 
-    log_file.close();
     return 0;
 }
