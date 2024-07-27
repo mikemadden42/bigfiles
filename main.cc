@@ -6,9 +6,9 @@
 
 namespace fs = std::filesystem;
 
-std::optional<std::vector<fs::path>> find_large_files(const fs::path& directory,
-                                                      uintmax_t size_limit,
-                                                      std::ofstream& log_file) {
+std::optional<std::vector<fs::path>> find_large_files(
+    const fs::path& directory, const uintmax_t size_limit,
+    std::ofstream& log_file) {
     std::vector<fs::path> large_files;
     try {
         for (const auto& entry : fs::recursive_directory_iterator(
@@ -41,9 +41,10 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    fs::path directory = argv[1];
-    fs::path log_file_path = argv[2];
-    uintmax_t size_limit = 4ULL * 1024 * 1024 * 1024;  // 4 GB in bytes
+    const fs::path directory = argv[1];
+    const fs::path log_file_path = argv[2];
+    constexpr uintmax_t size_limit =
+        4ULL * 1024 * 1024 * 1024;  // 4 GB in bytes
 
     std::ofstream log_file(log_file_path, std::ios::out | std::ios::app);
     if (!log_file.is_open()) {
