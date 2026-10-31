@@ -1,6 +1,12 @@
 # List of build types
 $buildTypes = @("Debug", "Release", "ASAN", "UBSAN", "TSAN", "MSAN", "COVERAGE", "RelWithDebInfo")
 
+# MSVC only supports ASAN among the extra build types
+if ($env:OS -eq "Windows_NT") {
+    $buildTypes = @("Debug", "Release", "ASAN", "RelWithDebInfo")
+    Write-Output "Skipping UBSAN, TSAN, MSAN and COVERAGE: not supported by MSVC."
+}
+
 # Directory for the build
 $buildDir = "build"
 
