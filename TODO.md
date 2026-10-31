@@ -1,7 +1,6 @@
 # TODO
 
-Findings from a project review (2026-10-31). Suggested order for what's left:
-the README (19), then the script tidy-ups (16, 17).
+Findings from a project review (2026-10-31). All items are done.
 
 ## main.cc
 
@@ -59,9 +58,9 @@ the README (19), then the script tidy-ups (16, 17).
       and it reads `%errorlevel%` inside a `( ... )` block, where the value is fixed at parse
       time (needs `!errorlevel!`). `run-builds.ps1` already does the same job with
       `cmake --build`, so consider deleting the `.bat`.
-- [ ] **16. `run-builds.bash`:** use `cmake --build .` instead of `make`, quote variables, and
+- [x] **16. `run-builds.bash`:** use `cmake --build .` instead of `make`, quote variables, and
       check that `cd` and the cmake configure step succeed.
-- [ ] **17. `run-builds.ps1`:** remove the redundant build-directory creation before the
+- [x] **17. `run-builds.ps1`:** remove the redundant build-directory creation before the
       loop, and stop capturing `cmake --build` output in `$buildResult` (it hides compiler
       errors).
 
@@ -70,4 +69,4 @@ the README (19), then the script tidy-ups (16, 17).
 - [x] **18.** Update `actions/checkout@v3` to v4+. Add a matrix for macOS/Windows and
       ASAN/UBSAN builds. Add at least one smoke test (`enable_testing()` + `add_test`)
       against a temp directory; right now `ctest` runs with no tests.
-- [ ] **19.** Expand the README: build steps, usage, and the size threshold.
+- [x] **19.** Expand the README: build steps, usage, and the size threshold.

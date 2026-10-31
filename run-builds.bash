@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Run from the repository root, wherever the script is called from
+cd "$(dirname "$0")" || exit 1
+
 # List of build types
 BUILD_TYPES=("Debug" "Release" "ASAN" "UBSAN" "TSAN" "COVERAGE" "RelWithDebInfo")
 
@@ -13,9 +16,6 @@ fi
 # Directory for the build
 BUILD_DIR="build"
 
-# Create the build directory if it does not exist
-mkdir -p $BUILD_DIR
-
 # Initialize counters and arrays for build results
 success_count=0
 failure_count=0
@@ -27,26 +27,22 @@ for build_type in "${BUILD_TYPES[@]}"; do
 	echo "Building for type: $build_type"
 
 	# Remove any existing build artifacts
-	rm -rf $BUILD_DIR
-	mkdir -p $BUILD_DIR
-	cd $BUILD_DIR
+	rm -rf "$BUILD_DIR"
 
-	# Run CMake with the current build type
-	cmake -DCMAKE_BUILD_TYPE=$build_type ..
-
-	# Build the project
-	if make; then
+	# Configure with the current build type, then build
+	if ! cmake -S . -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE="$build_type"; then
+		echo "$build_type configuration failed."
+		failed_builds+=("$build_type")
+		failure_count=$((failure_count + 1))
+	elif cmake --build "$BUILD_DIR"; then
 		echo "$build_type build succeeded."
-		successful_builds+=($build_type) # Add the successful build type to the list
-		((success_count++))
+		successful_builds+=("$build_type")
+		success_count=$((success_count + 1))
 	else
 		echo "$build_type build failed."
-		failed_builds+=($build_type) # Add the failed build type to the list
-		((failure_count++))
+		failed_builds+=("$build_type")
+		failure_count=$((failure_count + 1))
 	fi
-
-	# Go back to the root directory
-	cd ..
 done
 
 # Report the summary of builds
@@ -55,7 +51,7 @@ echo "Successful Builds: $success_count"
 echo "Failed Builds: $failure_count"
 
 # List successful build types
-if [ ${#successful_builds[@]} -gt 0 ]; then
+if [ "${#successful_builds[@]}" -gt 0 ]; then
 	echo "Successful Build Types:"
 	for successful_build in "${successful_builds[@]}"; do
 		echo "  - $successful_build"
@@ -63,7 +59,7 @@ if [ ${#successful_builds[@]} -gt 0 ]; then
 fi
 
 # List failed build types if there were any failures
-if [ ${#failed_builds[@]} -gt 0 ]; then
+if [ "${#failed_builds[@]}" -gt 0 ]; then
 	echo "Failed Build Types:"
 	for failed_build in "${failed_builds[@]}"; do
 		echo "  - $failed_build"
@@ -71,7 +67,7 @@ if [ ${#failed_builds[@]} -gt 0 ]; then
 fi
 
 # Exit with appropriate status code
-if [ $failure_count -gt 0 ]; then
+if [ "$failure_count" -gt 0 ]; then
 	exit 1
 else
 	exit 0
