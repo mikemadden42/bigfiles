@@ -1,7 +1,14 @@
 #!/bin/bash
 
 # List of build types
-BUILD_TYPES=("Debug" "Release" "ASAN" "UBSAN" "TSAN" "MSAN" "COVERAGE" "RelWithDebInfo")
+BUILD_TYPES=("Debug" "Release" "ASAN" "UBSAN" "TSAN" "COVERAGE" "RelWithDebInfo")
+
+# MemorySanitizer needs Clang on Linux
+if [ "$(uname)" = "Linux" ] && "${CXX:-c++}" --version 2>/dev/null | grep -q clang; then
+	BUILD_TYPES+=("MSAN")
+else
+	echo "Skipping MSAN: needs Clang on Linux."
+fi
 
 # Directory for the build
 BUILD_DIR="build"
