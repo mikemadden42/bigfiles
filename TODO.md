@@ -1,7 +1,7 @@
 # TODO
 
 Findings from a project review (2026-10-31). Suggested order for what's left:
-usability (6–8), then the README (19), then the script tidy-ups (16, 17).
+the README (19), then the script tidy-ups (16, 17).
 
 ## main.cc
 
@@ -25,9 +25,9 @@ usability (6–8), then the README (19), then the script tidy-ups (16, 17).
       `log_error`).
 
 ### Usability
-- [ ] **6.** Make the 4 GB limit configurable (e.g. `--min-size 4G`) instead of hard-coded.
-- [ ] **7.** Make the log file argument optional, defaulting to stderr.
-- [ ] **8.** Minor cleanup:
+- [x] **6.** Make the 4 GB limit configurable (e.g. `--min-size 4G`) instead of hard-coded.
+- [x] **7.** Make the log file argument optional, defaulting to stderr.
+- [x] **8.** Minor cleanup:
   - `log_error` is defined but `find_large_files` doesn't use it.
   - Log entries have no timestamps, even though the file is opened in append mode.
   - Use `'\n'` instead of `std::endl` to avoid flushing on every line.
