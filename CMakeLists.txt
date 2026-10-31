@@ -131,6 +131,13 @@ endfunction()
 # Apply custom flags to your executable
 add_custom_flags(bigfiles)
 
+# Tests
+enable_testing()
+if (NOT WIN32)
+    add_test(NAME smoke_test
+        COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/tests/smoke_test.sh $<TARGET_FILE:bigfiles>)
+endif()
+
 # macOS specific settings
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     set_target_properties(bigfiles PROPERTIES
