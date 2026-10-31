@@ -1,3 +1,6 @@
+# Run from the repository root, wherever the script is called from
+Set-Location -Path $PSScriptRoot
+
 # List of build types
 $buildTypes = @("Debug", "Release", "ASAN", "UBSAN", "TSAN", "MSAN", "COVERAGE", "RelWithDebInfo")
 
@@ -16,12 +19,6 @@ $failureCount = 0
 $successfulBuilds = @()
 $failedBuilds = @()
 
-# Create the build directory if it does not exist
-if (Test-Path $buildDir) {
-    Remove-Item -Recurse -Force $buildDir
-}
-New-Item -ItemType Directory -Name $buildDir
-
 # Loop through each build type
 foreach ($buildType in $buildTypes) {
     Write-Output "Building for type: $buildType"
@@ -30,14 +27,18 @@ foreach ($buildType in $buildTypes) {
     if (Test-Path $buildDir) {
         Remove-Item -Recurse -Force $buildDir
     }
-    New-Item -ItemType Directory -Name $buildDir
-    Set-Location -Path $buildDir
 
-    # Run CMake with the current build type
-    cmake -DCMAKE_BUILD_TYPE=$buildType ..
+    # Configure with the current build type, then build. Build output is
+    # shown, not captured, so compiler errors are visible.
+    cmake -S . -B $buildDir "-DCMAKE_BUILD_TYPE=$buildType"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Output "$buildType configuration failed."
+        $failedBuilds += $buildType
+        $failureCount++
+        continue
+    }
 
-    # Build the project
-    $buildResult = cmake --build . --config $buildType
+    cmake --build $buildDir --config $buildType
     if ($LASTEXITCODE -eq 0) {
         Write-Output "$buildType build succeeded."
         $successfulBuilds += $buildType
@@ -47,9 +48,6 @@ foreach ($buildType in $buildTypes) {
         $failedBuilds += $buildType
         $failureCount++
     }
-
-    # Go back to the root directory
-    Set-Location -Path ..
 }
 
 # Report the summary of builds
